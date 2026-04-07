@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import logoUrl from "@/assets/scropids-logo.svg";
 
 const navItems = [
-  { label: "Overview", to: "/", icon: LayoutDashboard },
+  { label: "Overview", to: "/dashboard", icon: LayoutDashboard },
   { label: "Alerts", to: "/alerts", icon: ShieldAlert },
   { label: "Agents", to: "/agents", icon: Radar },
   { label: "LLM Config", to: "/llm-config", icon: Bot },

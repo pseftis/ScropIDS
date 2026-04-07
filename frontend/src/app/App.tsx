@@ -13,6 +13,8 @@ import { LlmConfigPage } from "@/pages/LlmConfigPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RulesPage } from "@/pages/RulesPage";
 import { SchedulerConfigPage } from "@/pages/SchedulerConfigPage";
+import { LandingPage } from "@/pages/LandingPage";
+import { AdminLoginPage } from "@/pages/AdminLoginPage";
 
 function ProtectedRoutes() {
   const { isAuthenticated, loading } = useAuth();
@@ -57,9 +59,11 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+      <Route path="/admin-login" element={isAuthenticated ? <Navigate to="/admin/" replace /> : <AdminLoginPage />} />
       <Route element={<ProtectedRoutes />}>
-        <Route path="/" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/agents" element={<AgentsPage />} />
         <Route path="/agents/:agentId" element={<AgentTimelinePage />} />
@@ -68,7 +72,7 @@ function AppRoutes() {
         <Route path="/rules" element={<RulesPage />} />
         <Route path="/enrollment-tokens" element={<Navigate to="/agents" replace />} />
       </Route>
-      <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
+      <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} replace />} />
     </Routes>
   );
 }

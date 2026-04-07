@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
@@ -106,9 +107,9 @@ export function LoginPage() {
             </Button>
             {isLocalhost ? (
               <Button asChild variant="ghost">
-                <a href="/admin/login/?next=/admin/" target="_blank" rel="noreferrer">
+                <Link to="/admin-login">
                   Admin
-                </a>
+                </Link>
               </Button>
             ) : null}
           </div>
