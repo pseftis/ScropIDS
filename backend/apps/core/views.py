@@ -152,9 +152,23 @@ class SessionLoginView(APIView):
     def post(self, request):
         username = request.data.get("username", "").strip()
         password = request.data.get("password", "")
+        otp_code = request.data.get("otp_code", "")
+
         user = authenticate(request, username=username, password=password)
         if user is None:
             return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        from .models import UserProfile
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+
+        if profile.is_otp_enabled:
+            if not otp_code:
+                return Response({"detail": "OTP code is required.", "otp_required": True}, status=status.HTTP_401_UNAUTHORIZED)
+            import pyotp
+            totp = pyotp.TOTP(profile.otp_secret)
+            if not totp.verify(otp_code):
+                return Response({"detail": "Invalid OTP code."}, status=status.HTTP_401_UNAUTHORIZED)
+
         login(request, user)
         return Response({"detail": "Authenticated.", "username": user.get_username()})
 
@@ -232,6 +246,43 @@ class SessionMeView(APIView):
                 ],
             }
         )
+
+
+class SessionSetupOtpView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        from .models import UserProfile
+        import pyotp
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        totp = pyotp.TOTP(profile.otp_secret)
+        uri = totp.provisioning_uri(name=request.user.email or request.user.username, issuer_name="ScropIDS")
+        return Response({
+            "is_otp_enabled": profile.is_otp_enabled,
+            "secret": profile.otp_secret,
+            "provisioning_uri": uri
+        })
+
+    def post(self, request):
+        from .models import UserProfile
+        import pyotp
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        
+        enable = request.data.get("enable", True)
+        if enable:
+            otp_code = request.data.get("otp_code")
+            if not otp_code:
+                return Response({"detail": "OTP code is required to enable 2FA."}, status=status.HTTP_400_BAD_REQUEST)
+            if not pyotp.TOTP(profile.otp_secret).verify(otp_code):
+                return Response({"detail": "Invalid OTP code."}, status=status.HTTP_400_BAD_REQUEST)
+            profile.is_otp_enabled = True
+        else:
+            profile.is_otp_enabled = False
+            # Generate a new secret so the old one is invalidated
+            profile.otp_secret = pyotp.random_base32()
+        
+        profile.save()
+        return Response({"detail": "OTP settings updated.", "is_otp_enabled": profile.is_otp_enabled})
 
 
 class AgentHeartbeatView(APIView):

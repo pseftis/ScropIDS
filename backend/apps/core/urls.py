@@ -26,6 +26,7 @@ from .views import (
     SessionRegisterView,
     SessionLogoutView,
     SessionMeView,
+    SessionSetupOtpView,
 )
 
 router = DefaultRouter()
@@ -44,6 +45,7 @@ urlpatterns = [
     path("auth/register/", SessionRegisterView.as_view(), name="auth-register"),
     path("auth/logout/", SessionLogoutView.as_view(), name="auth-logout"),
     path("auth/me/", SessionMeView.as_view(), name="auth-me"),
+    path("auth/otp/setup/", SessionSetupOtpView.as_view(), name="auth-otp-setup"),
     path("agents/enroll/", AgentEnrollmentView.as_view(), name="agents-enroll"),
     path("agents/bootstrap/", AgentBootstrapView.as_view(), name="agents-bootstrap"),
     path("agents/quick-enroll/", AgentQuickEnrollView.as_view(), name="agents-quick-enroll"),

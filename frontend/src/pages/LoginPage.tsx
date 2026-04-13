@@ -20,6 +20,8 @@ export function LoginPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [otpRequired, setOtpRequired] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
   const isLocalhost =
     typeof window !== "undefined" &&
     (window.location.hostname === "localhost" ||
@@ -30,10 +32,15 @@ export function LoginPage() {
     event.preventDefault();
     setSubmitting(true);
     try {
-      await login(username, password);
+      await login(username, password, otpRequired ? otpCode : undefined);
       toast.success("Welcome to ScropIDS");
-    } catch (error) {
-      toast.error(errorMessage(error));
+    } catch (error: any) {
+      if (error?.response?.data?.otp_required) {
+        setOtpRequired(true);
+        toast.info("Please enter your 2FA OTP code.");
+      } else {
+        toast.error(errorMessage(error));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -150,6 +157,21 @@ export function LoginPage() {
                   </button>
                 </div>
               </div>
+              {otpRequired && (
+                <div className="grid gap-2.5">
+                  <label htmlFor="otpCode" className="text-xs uppercase tracking-wide text-muted flex items-center justify-between">
+                    <span>Authenticator Code</span>
+                    <span className="text-cyan-400">Required</span>
+                  </label>
+                  <Input
+                    id="otpCode"
+                    value={otpCode}
+                    onChange={(event) => setOtpCode(event.target.value)}
+                    autoComplete="one-time-code"
+                    required
+                  />
+                </div>
+              )}
               <Button type="submit" className="h-10 text-base" disabled={submitting}>
                 {submitting ? "Signing in..." : "Sign in"}
               </Button>

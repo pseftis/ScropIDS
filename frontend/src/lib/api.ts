@@ -32,8 +32,19 @@ export function clearActiveOrgSlug(): void {
 
 export function errorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError<{ detail?: string }>;
-    return axiosError.response?.data?.detail ?? axiosError.message;
+    const data = error.response?.data;
+    if (data && typeof data === "object") {
+      if ("detail" in data && typeof data.detail === "string") {
+        return data.detail;
+      }
+      // Extract DRF field validation errors (e.g. { "username": ["exists"], "password": ["too short"] })
+      for (const key in data) {
+        if (Array.isArray(data[key]) && data[key].length > 0) {
+          return `${key}: ${data[key][0]}`;
+        }
+      }
+    }
+    return error.message;
   }
   return "Unexpected error.";
 }

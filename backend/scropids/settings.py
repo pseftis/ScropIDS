@@ -122,7 +122,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     x.strip()
-    for x in os.getenv("CSRF_TRUSTED_ORIGINS", FRONTEND_ORIGIN).split(",")
+    for x in os.getenv("CSRF_TRUSTED_ORIGINS", f"{FRONTEND_ORIGIN},http://localhost:5173,http://127.0.0.1:5173").split(",")
     if x.strip()
 ]
 

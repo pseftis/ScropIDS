@@ -5,6 +5,7 @@ import secrets
 import uuid
 from datetime import timedelta
 from hmac import compare_digest
+import pyotp
 
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -13,6 +14,19 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from .services.encryption import decrypt_text, encrypt_text
+
+
+def get_default_otp_secret():
+    return pyotp.random_base32()
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
+    otp_secret = models.CharField(max_length=32, default=get_default_otp_secret)
+    is_otp_enabled = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.username} Profile"
 
 
 class Severity(models.TextChoices):

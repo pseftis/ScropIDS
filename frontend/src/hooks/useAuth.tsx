@@ -9,7 +9,7 @@ type AuthContextValue = {
   loading: boolean;
   isAuthenticated: boolean;
   activeOrgSlug: string | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string, otpCode?: string) => Promise<void>;
   register: (payload: { username: string; password: string; organizationName: string }) => Promise<void>;
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
@@ -56,9 +56,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const login = async (username: string, password: string) => {
+  const login = async (username: string, password: string, otpCode?: string) => {
     await api.get("/auth/csrf/");
-    await api.post("/auth/login/", { username, password });
+    await api.post("/auth/login/", { username, password, otp_code: otpCode });
     await refreshMe();
   };
 
