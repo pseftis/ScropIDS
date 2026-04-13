@@ -61,7 +61,9 @@ export function LoginPage() {
         password: registerPassword,
         organizationName,
       });
-      toast.success("Account created. Welcome to ScropIDS");
+      setMode("login");
+      setUsername(registerUsername);
+      toast.success("Account created! Please sign in to receive your OTP.");
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {

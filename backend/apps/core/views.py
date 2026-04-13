@@ -225,10 +225,9 @@ class SessionRegisterView(APIView):
                 role=MembershipRole.OWNER,
             )
 
-        login(request, user)
         return Response(
             {
-                "detail": "Account created.",
+                "detail": "Account created successfully.",
                 "username": user.get_username(),
                 "organization": {
                     "id": str(organization.id),
