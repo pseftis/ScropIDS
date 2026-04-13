@@ -37,6 +37,7 @@ class SessionRegisterSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, min_length=3)
     password = serializers.CharField(max_length=128, min_length=8, write_only=True)
     organization_name = serializers.CharField(max_length=120, min_length=2)
+    email = serializers.EmailField(required=True)
 
     def validate_username(self, value: str) -> str:
         normalized = value.strip()

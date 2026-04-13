@@ -158,16 +158,42 @@ class SessionLoginView(APIView):
         if user is None:
             return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        from .models import UserProfile
-        profile, _ = UserProfile.objects.get_or_create(user=user)
+        from django.core.cache import cache
+        from django.core.mail import send_mail
+        import secrets
 
-        if profile.is_otp_enabled:
+        # Always enforce Email OTP if the user has an email
+        if user.email:
+            cached_otp = cache.get(f"login_otp_{user.id}")
             if not otp_code:
-                return Response({"detail": "OTP code is required.", "otp_required": True}, status=status.HTTP_401_UNAUTHORIZED)
-            import pyotp
-            totp = pyotp.TOTP(profile.otp_secret)
-            if not totp.verify(otp_code):
-                return Response({"detail": "Invalid OTP code."}, status=status.HTTP_401_UNAUTHORIZED)
+                # Generate new OTP and send email
+                new_otp = str(secrets.randbelow(900000) + 100000)
+                cache.set(f"login_otp_{user.id}", new_otp, 300) # 5 min expiry
+                send_mail(
+                    "Your ScropIDS Login Code",
+                    f"Your highly secure ScropIDS authentication code is: {new_otp}\n\nThis code will expire in 5 minutes.",
+                    settings.ALERT_EMAIL_FROM,
+                    [user.email],
+                    fail_silently=True,
+                )
+                return Response({"detail": "OTP code sent to your email.", "otp_required": True}, status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                if not cached_otp or str(otp_code) != str(cached_otp):
+                    return Response({"detail": "Invalid or expired OTP code."}, status=status.HTTP_401_UNAUTHORIZED)
+                # Valid email OTP, delete cache and proceed to login
+                cache.delete(f"login_otp_{user.id}")
+        else:
+            # Fallback to Authenticator app 2FA if email is not present but app is enabled
+            from .models import UserProfile
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+
+            if profile.is_otp_enabled:
+                if not otp_code:
+                    return Response({"detail": "OTP code is required.", "otp_required": True}, status=status.HTTP_401_UNAUTHORIZED)
+                import pyotp
+                totp = pyotp.TOTP(profile.otp_secret)
+                if not totp.verify(otp_code):
+                    return Response({"detail": "Invalid OTP code."}, status=status.HTTP_401_UNAUTHORIZED)
 
         login(request, user)
         return Response({"detail": "Authenticated.", "username": user.get_username()})
@@ -187,6 +213,7 @@ class SessionRegisterView(APIView):
             user = User.objects.create_user(
                 username=payload["username"],
                 password=payload["password"],
+                email=payload["email"],
             )
             organization = Organization.objects.create(
                 name=payload["organization_name"],

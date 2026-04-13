@@ -15,6 +15,7 @@ export function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [registerUsername, setRegisterUsername] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
   const [organizationName, setOrganizationName] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -56,6 +57,7 @@ export function LoginPage() {
     try {
       await register({
         username: registerUsername,
+        email: registerEmail,
         password: registerPassword,
         organizationName,
       });
@@ -187,6 +189,19 @@ export function LoginPage() {
                   value={registerUsername}
                   onChange={(event) => setRegisterUsername(event.target.value)}
                   autoComplete="username"
+                  required
+                />
+              </div>
+              <div className="grid gap-2.5">
+                <label htmlFor="register-email" className="text-xs uppercase tracking-wide text-muted">
+                  Email Address
+                </label>
+                <Input
+                  id="register-email"
+                  type="email"
+                  value={registerEmail}
+                  onChange={(event) => setRegisterEmail(event.target.value)}
+                  autoComplete="email"
                   required
                 />
               </div>
