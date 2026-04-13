@@ -170,8 +170,8 @@ class SessionLoginView(APIView):
                 new_otp = str(secrets.randbelow(900000) + 100000)
                 cache.set(f"login_otp_{user.id}", new_otp, 300) # 5 min expiry
                 send_mail(
-                    "Your ScropIDS Login Code",
-                    f"Your highly secure ScropIDS authentication code is: {new_otp}\n\nThis code will expire in 5 minutes.",
+                    "Your ScropIDS Login OTP",
+                    f"Your highly secure ScropIDS OTP is: {new_otp}\n\nThis OTP will expire in 5 minutes.",
                     settings.ALERT_EMAIL_FROM,
                     [user.email],
                     fail_silently=True,

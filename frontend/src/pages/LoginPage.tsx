@@ -38,7 +38,7 @@ export function LoginPage() {
     } catch (error: any) {
       if (error?.response?.data?.otp_required) {
         setOtpRequired(true);
-        toast.info("Please enter your 2FA OTP code.");
+        toast.info("Please enter your OTP.");
       } else {
         toast.error(errorMessage(error));
       }
@@ -162,7 +162,7 @@ export function LoginPage() {
               {otpRequired && (
                 <div className="grid gap-2.5">
                   <label htmlFor="otpCode" className="text-xs uppercase tracking-wide text-muted flex items-center justify-between">
-                    <span>Authenticator Code</span>
+                    <span>One-Time Password (OTP)</span>
                     <span className="text-cyan-400">Required</span>
                   </label>
                   <Input
